@@ -70,7 +70,7 @@ class RandRotation_z(object):
     def __call__(self, pointcloud):
         assert len(pointcloud.shape)==2
 
-        theta = random.random() * 2. * math.pi
+        theta = random.random() * 0.25 * math.pi
         rot_matrix = np.array([[ math.cos(theta), -math.sin(theta),    0],
                                [ math.sin(theta),  math.cos(theta),    0],
                                [0,                             0,      1]])
@@ -82,10 +82,27 @@ class RandomNoise(object):
     def __call__(self, pointcloud):
         assert len(pointcloud.shape)==2
 
-        noise = np.random.normal(0, 0.02, (pointcloud.shape))
+        noise = np.random.normal(0, 0.03, (pointcloud.shape))
     
         noisy_pointcloud = pointcloud + noise
         return  noisy_pointcloud
+
+class Jitter(object):
+    def __init__(self, sigma):
+      self.sigma = sigma
+      
+    def __call__(self, pointcloud):
+        sigma = self.sigma
+        clip  = 0.05
+
+        assert len(pointcloud.shape)==2
+
+        num_points, num_dimensions = pointcloud.shape        
+        jittered_data = sigma * np.random.randn(num_points, num_dimensions)
+        jittered_data = np.clip(jittered_data, -clip, clip)  # Clip the jitter to prevent extreme values
+        pointcloud += jittered_data
+        return pointcloud
+
         
 class ToTensor(object):
     def __call__(self, pointcloud):
